@@ -1,0 +1,68 @@
+SERVER_HOST: 192.168.16.130
+
+server:
+  port: 8090
+spring:
+  application:
+    name: gateway
+
+  cloud:
+    zookeeper:
+      connect-string: ${SERVER_HOST}:2181
+      discovery:
+        register: true
+        enabled: true
+    gateway:
+      routes:
+        - id: host_route
+          uri: lb://user-server  # lb: 启用自带的负载均衡
+          predicates:
+            - Path=/user-server/**
+          #如果请求的路径为/user-server/bar，则目标uri为 http://localhost:8000/bar。
+          #如果上面例子中没有加一个StripPrefix=1过滤器，则目标uri 为http://localhost:8000/foo/bar，
+          #StripPrefix过滤器是去掉一个路径。
+          filters:
+            - StripPrefix=1
+
+        - id: browse_route
+          uri: lb://browse
+          predicates:
+            - Path=/browse/**
+
+        - id: commodity_manage_route
+          uri: lb://commodity-manage
+          predicates:
+            - Path=/comm-manage/**
+          filters:
+            - StripPrefix=1
+
+        - id: shopping_route
+          uri: lb://shopping
+          predicates:
+            - Path=/shopping/**
+      globalcors:
+        cors-configurations:
+          '[/**]': # 允许跨域访问的资源
+            allowedOrigins: "*"  # 跨域允许的来源
+            allowedMethods:
+              - GET
+              - POST
+
+
+  redis:
+    host: ${SERVER_HOST}
+    port: 6379
+    database: 0  # 选择的数据库
+    timeout: 1800000  # 连接超时时间
+    lettuce:
+      pool:
+        max-active: 30  # 连接池最大连接数
+        max-wait: -1  # 最大阻塞等待时间（无限制）
+        max-idle: 5  # 最大空闲连接
+        min-idle: 0  # 最小空闲连接
+
+  datasource:
+    name: user_db
+    url: jdbc:mysql://${SERVER_HOST}:3306/popomall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: test
+    password: 123456

@@ -1,0 +1,35 @@
+SERVER_HOST: 192.168.16.130
+
+server:
+  port: 8002
+spring:
+  application:
+    name: browse
+
+  cloud:
+    zookeeper:
+      connect-string: ${SERVER_HOST}:2181
+      discovery:
+        register: true
+        enabled: true
+
+  redis:
+    host: ${SERVER_HOST}
+    port: 6379
+    database: 0  # 选择的数据库
+    timeout: 1800000  # 连接超时时间
+    lettuce:
+      pool:
+        max-active: 30  # 连接池最大连接数
+        max-wait: -1  # 最大阻塞等待时间（无限制）
+        max-idle: 5  # 最大空闲连接
+        min-idle: 0  # 最小空闲连接
+
+  datasource:
+    name: user_db
+    url: jdbc:mysql://${SERVER_HOST}:3306/popomall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: test
+    password: 123456
+
+#logging:
+#  config: browse/logger-config.xml
